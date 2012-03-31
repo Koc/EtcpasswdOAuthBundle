@@ -46,28 +46,15 @@ class OAuthListener extends AbstractAuthenticationListener
     /**
      * {@inheritDoc}
      */
-    protected function requiresAuthentication(Request $request)
-    {
-        if ( $this->httpUtils->checkRequestPath($request, $this->options['check_path'])
-            || $this->httpUtils->checkRequestPath($request, $this->options['login_path'])
-        ) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     protected function attemptAuthentication(Request $request)
     {
+        $code = $request->get('code');
 
         // redirect to auth provider
-        if ($this->httpUtils->checkRequestPath($request, $this->options['login_path'])) {
+        if (!$code) {
             return $this->createProviderRedirectResponse($request);
         }
 
-        $code = $request->get('code');
         $token = $this->oauthProvider
             ->createTokenResponse(
                 $this->options['client_id'],
@@ -76,7 +63,7 @@ class OAuthListener extends AbstractAuthenticationListener
                 $this->assembleRedirectUrl($this->options['check_path'], $request)
             );
 
-        if (is_null($token)) {
+        if (null === $token) {
             throw new AuthenticationException('Authentication failed');
         }
 
