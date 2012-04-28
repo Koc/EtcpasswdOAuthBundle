@@ -16,15 +16,19 @@ use Etcpasswd\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
  */
 class OAuthProvider implements AuthenticationProviderInterface
 {
-    private $userProvider;
-    private $userChecker;
-    private $providerKey;
-    private $encoderFactory;
+    protected $providerKey;
+    protected $userProvider;
+    protected $userChecker;
 
-    public function __construct(UserProviderInterface $userProvider, $providerKey)
+    public function __construct($providerKey, UserProviderInterface $userProvider = null, UserCheckerInterface $userChecker = null)
     {
+        if (null !== $userProvider && null === $userChecker) {
+            throw new \InvalidArgumentException('$userChecker cannot be null, if $userProvider is not null.');
+        }
+
+        $this->providerKey = $providerKey;
         $this->userProvider = $userProvider;
-        $this->providerKey  = $providerKey;
+        $this->userChecker = $userChecker;
     }
 
     /**
@@ -32,9 +36,23 @@ class OAuthProvider implements AuthenticationProviderInterface
      */
     public function authenticate(TokenInterface $token)
     {
+        if (!$this->supports($token)) {
+            return;
+        }
+
+        if (null === $this->userProvider) {
+            $authenticatedToken = new OAuthToken($this->providerKey, $token->getResponse());
+            $authenticatedToken->setAuthenticated(true);
+            $authenticatedToken->setUser($token->getResponse()->getUsername());
+
+            return $authenticatedToken;
+        }
+
         $user = $this->userProvider->loadUserByUsername($token->getUsername());
         if ($user) {
-            $authenticatedToken = new OAuthToken($user->getRoles(), $token->getResponse());
+            $this->userChecker->checkPostAuth($user);
+
+            $authenticatedToken = new OAuthToken($this->providerKey, $token->getResponse(), $user->getRoles());
             $authenticatedToken->setAuthenticated(true);
             $authenticatedToken->setUser($user);
 
@@ -46,6 +64,6 @@ class OAuthProvider implements AuthenticationProviderInterface
 
     public function supports(TokenInterface $token)
     {
-        return $token instanceof OAuthToken;
+        return $token instanceof OAuthToken && $this->providerKey === $token->getProviderKey();
     }
 }

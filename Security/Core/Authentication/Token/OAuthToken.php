@@ -13,9 +13,12 @@ class OAuthToken extends AbstractToken
 {
     private $response;
 
-    public function __construct($roles = array(), TokenResponseInterface $response)
+    private $providerKey;
+
+    public function __construct($providerKey, TokenResponseInterface $response, array $roles = array())
     {
         parent::__construct($roles);
+        $this->providerKey = $providerKey;
         $this->response = $response;
         $this->setAttribute('access_token', $response->getAccessToken());
         $this->setAttribute('via', $response->getProviderKey());
@@ -38,4 +41,8 @@ class OAuthToken extends AbstractToken
         return $this->response;
     }
 
+    public function getProviderKey()
+    {
+        return $this->providerKey;
+    }
 }

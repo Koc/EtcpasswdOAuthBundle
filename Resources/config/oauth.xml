@@ -22,7 +22,6 @@
 
         <!-- security provider -->
         <service id="etcpasswd_oauth.authentication.provider.oauth" class="%etcpasswd_oauth.authentication.provider.oauth.class%">
-            <argument /> <!-- User Provider -->
             <argument /> <!-- Provider-shared Key -->
         </service>
 

@@ -32,6 +32,7 @@ class OAuthFactory extends AbstractFactory
     protected $options = array(
         'client_id'                      => null,
         'client_secret'                  => null,
+        'provider'                       => null,
         'auth_provider'                  => null,
         'scope'                          => null,
         'uid'                            => null,
@@ -53,14 +54,21 @@ class OAuthFactory extends AbstractFactory
     protected function createAuthProvider(ContainerBuilder $container, $id,
         $config, $userProviderId)
     {
-        $provider       = 'etcpasswd_oauth.authentication.provider.oauth.'.$id;
+        $provider  = 'etcpasswd_oauth.authentication.provider.oauth.'.$id.'.'.$config['auth_provider'];
+        $providerKey = $id.'.'.$config['auth_provider'];
 
-        $container
+        $definition = $container
             ->setDefinition($provider,
                 new DefinitionDecorator('etcpasswd_oauth.authentication.provider.oauth')
             )
-            ->replaceArgument(0, new Reference($userProviderId))
-            ->replaceArgument(1, $id);
+            ->replaceArgument(0, $providerKey);
+
+        if ($config['provider']) {
+            $definition
+                ->addArgument(new Reference($userProviderId))
+                ->addArgument(new Reference('security.user_checker'))
+            ;
+        }
 
         return $provider;
     }
