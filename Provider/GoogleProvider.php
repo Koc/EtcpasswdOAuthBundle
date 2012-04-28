@@ -4,6 +4,7 @@ namespace Etcpasswd\OAuthBundle\Provider;
 
 use Buzz\Message\Request;
 use Buzz\Message\Response;
+
 use Etcpasswd\OAuthBundle\Provider\Token\GoogleToken;
 
 /**
@@ -17,31 +18,22 @@ class GoogleProvider extends Provider
     /**
      * {@inheritDoc}
      */
-    public function createTokenResponse($clientId, $secret, $code, $redirectUrl = "")
+    public function createTokenResponse($clientId, $secret, $code, $redirectUrl = '')
     {
-        $url = 'https://www.google.com/accounts/o8/oauth2/token';
-
-        $request = new Request(Request::METHOD_POST, $url);
-        $request->setContent(http_build_query(array(
+        $response = $this->client->request('https://www.google.com/accounts/o8/oauth2/token', array(
             'code'          => $code,
             'client_id'     => $clientId,
             'client_secret' => $secret,
             'grant_type'    => 'authorization_code',
-            'redirect_uri'  => urldecode($redirectUrl)
-        )));
-
-        $response = new Response();
-        $this->client->send($request, $response);
+            'redirect_uri'  => $redirectUrl
+        ));
 
         $data = json_decode($response->getContent());
         if (isset($data->error)) {
             return;
         }
 
-        $people = 'https://www.googleapis.com/plus/v1/people/me'
-            .'?key='.$clientId
-            .'&access_token='.$data->access_token;
-        $me = json_decode($this->request($people));
+        $me = json_decode($this->request(sprintf('https://www.googleapis.com/plus/v1/people/me?key=%s&access_token=%s', $clientId, $data->access_token)));
 
         return new GoogleToken($me, $data->access_token, new \DateTime('@'.(time() + $data->expires_in), new \DateTimeZone('UTC')));
     }
@@ -51,10 +43,11 @@ class GoogleProvider extends Provider
      */
     public function getAuthorizationUrl($clientId, $scope, $redirectUrl)
     {
-        return 'https://accounts.google.com/o/oauth2/auth'
-            .'?client_id='.$clientId
-            .'&redirect_uri='.$redirectUrl
-            .'&scope='.urlencode($scope)
-            .'&response_type=code';
+        return 'https://accounts.google.com/o/oauth2/auth?'.http_build_query(array(
+            'client_id'     => $clientId,
+            'redirect_uri'  => $redirectUrl,
+            'scope'         => $scope,
+            'response_type' => 'code'
+        ), null, '&');
     }
 }

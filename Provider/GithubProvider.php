@@ -15,16 +15,18 @@ class GithubProvider extends Provider
     /**
      * {@inheritDoc}
      */
-    public function createTokenResponse($clientId, $secret, $code, $redirectUrl = "")
+    public function createTokenResponse($clientId, $secret, $code, $redirectUrl = '')
     {
-        $url = 'https://github.com/login/oauth/access_token'
-            .'?client_id='.$clientId
-            .'&redirect_url='.$redirectUrl
-            .'&client_secret='.$secret
-            .'&code='.$code
-            .'&grant_type=authorization_code';
+        $url = 'https://github.com/login/oauth/access_token?'.  http_build_query(array(
+            'client_id' => $clientId,
+            'redirect_url' => $redirectUrl,
+            'client_secret' => $secret,
+            'code' => $code,
+            'grant_type' => 'authorization_code',
+        ), null, '&');
 
-        $response = parse_str($this->request($url), $result);
+        $result = array();
+        parse_str($this->request($url), $result);
 
         if (isset($result['error'])) {
 
@@ -65,11 +67,7 @@ class GithubProvider extends Provider
             return;
         }
 
-        // call user api to fetch some details
-        $accessToken = $result['access_token'];
-
-        $url = 'https://api.github.com/user?access_token='.$accessToken;
-        $jsonObject = json_decode($this->request($url));
+        $jsonObject = json_decode($this->request(sprintf('https://api.github.com/user?access_token=%s', $result['access_token'])));
 
         return new GithubToken($jsonObject, $result['access_token']);
     }
@@ -79,9 +77,10 @@ class GithubProvider extends Provider
      */
     public function getAuthorizationUrl($clientId, $scope, $redirectUrl)
     {
-        return 'https://github.com/login/oauth/authorize'
-            .'?client_id='.$clientId
-            .'&scope='.$scope
-            .'&redirect_url='.urlencode($redirectUrl);
+        return 'https://github.com/login/oauth/authorize?'.  http_build_query(array(
+            'client_id'    => $clientId,
+            'scope'        => $scope,
+            'redirect_url' => $redirectUrl,
+        ), null, '&');
     }
 }

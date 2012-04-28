@@ -1,29 +1,24 @@
 <?php
 
-namespace Etcpasswd\OAuthBundle\Security\Http\Firewall;
+namespace Katushkin\Bundle\UsersBundle\Security\Http\Authentication\Oauth;
 
-use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener,
-    Symfony\Component\Security\Core\Exception\AuthenticationException,
-    Symfony\Component\Security\Core\SecurityContextInterface,
-    Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
-    Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface,
-    Symfony\Component\Security\Http\HttpUtils,
-    Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface,
-    Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface,
-    Symfony\Component\HttpKernel\Log\LoggerInterface,
-    Symfony\Component\EventDispatcher\EventDispatcherInterface,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\SecurityContextInterface;
+use Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface;
+use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
+use Symfony\Component\Security\Http\HttpUtils;
+use Symfony\Component\Security\Http\Authentication\AuthenticationSuccessHandlerInterface;
+use Symfony\Component\Security\Http\Authentication\AuthenticationFailureHandlerInterface;
+use Symfony\Component\HttpKernel\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-use Etcpasswd\OAuthBundle\Provider\ProviderInterface,
-    Etcpasswd\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
+use Etcpasswd\OAuthBundle\Provider\ProviderInterface;
+use Etcpasswd\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
 
-/**
- * Authentication listener handling OAuth Authentication requests
- *
- * @author   Marcel Beerta <marcel@etcpasswd.de>
- */
-class OAuthListener extends AbstractAuthenticationListener
+class AuthenticationListener extends AbstractAuthenticationListener
 {
     private $oauthProvider;
     protected $httpUtils;
@@ -32,15 +27,15 @@ class OAuthListener extends AbstractAuthenticationListener
      * {@inheritdoc}
      */
     public function __construct(SecurityContextInterface $securityContext, AuthenticationManagerInterface $authenticationManager,
-        SessionAuthenticationStrategyInterface $sessionStrategy, HttpUtils $httpUtils, $providerKey,
-        array $options = array(), AuthenticationSuccessHandlerInterface $successHandler = null,
-        AuthenticationFailureHandlerInterface $failureHandler = null, LoggerInterface $logger = null,
-        EventDispatcherInterface $dispatcher = null, ProviderInterface $oauthProvider)
+            SessionAuthenticationStrategyInterface $sessionStrategy, HttpUtils $httpUtils, $providerKey,
+            array $options = array(), AuthenticationSuccessHandlerInterface $successHandler = null,
+            AuthenticationFailureHandlerInterface $failureHandler = null, LoggerInterface $logger = null,
+            EventDispatcherInterface $dispatcher = null, ProviderInterface $oauthProvider)
     {
-        parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $httpUtils, $providerKey,
-            $options, $successHandler, $failureHandler, $logger, $dispatcher);
+        parent::__construct($securityContext, $authenticationManager, $sessionStrategy, $httpUtils,
+                $providerKey, $options, $successHandler, $failureHandler, $logger, $dispatcher);
         $this->oauthProvider = $oauthProvider;
-        $this->httpUtils     = $httpUtils;
+        $this->httpUtils = $httpUtils;
     }
 
     /**
@@ -53,15 +48,14 @@ class OAuthListener extends AbstractAuthenticationListener
         // redirect to auth provider
         if (!$code) {
             return $this->createProviderRedirectResponse($request);
-        }
+    }
 
-        $token = $this->oauthProvider
-            ->createTokenResponse(
-                $this->options['client_id'],
-                $this->options['client_secret'],
-                $code,
-                $this->assembleRedirectUrl($this->options['check_path'], $request)
-            );
+        $token = $this->oauthProvider->createTokenResponse(
+            $this->options['client_id'],
+            $this->options['client_secret'],
+            $code,
+            $this->assembleRedirectUrl($this->options['check_path'], $request)
+        );
 
         if (null === $token) {
             throw new AuthenticationException('Authentication failed');
@@ -73,11 +67,10 @@ class OAuthListener extends AbstractAuthenticationListener
             $username = $token->getUsername($this->options['uid']);
         }
 
-        $authToken = new OAuthToken($this->providerKey, array(), $token);
+        $authToken = new OAuthToken($this->providerKey, $token);
         $authToken->setUser($username);
 
-        return $this->authenticationManager
-            ->authenticate($authToken);
+        return $this->authenticationManager->authenticate($authToken);
     }
 
     private function createProviderRedirectResponse(Request $request)
@@ -87,15 +80,18 @@ class OAuthListener extends AbstractAuthenticationListener
             $this->options['scope'],
             $this->assembleRedirectUrl($this->options['check_path'], $request)
         );
+
         return $this->httpUtils->createRedirectResponse($request, $url);
     }
 
     private function assembleRedirectUrl($path, Request $request)
     {
-        $proto = $request->isSecure() ? 'https' : 'http';
+        $url = $request->getUriForPath($path);
 
-        $url = sprintf('%s://%s%s', $proto, $request->getHost(), $path);
+        if ($targetUrl = $request->get($this->options['target_path_parameter'], null, true)) {
+            $url .= '?'.$this->options['target_path_parameter'].'='.urlencode($targetUrl);
+        }
 
-        return urlencode($url);
+        return $url;
     }
 }

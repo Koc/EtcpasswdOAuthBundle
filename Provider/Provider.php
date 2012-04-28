@@ -18,15 +18,21 @@ abstract class Provider implements ProviderInterface
     public function __construct(ClientInterface $client)
     {
         $this->client = $client;
+        if (method_exists($this->client, 'setVerifyPeer')) {
+            $this->client->setVerifyPeer(false);
+        }
     }
 
-    protected function request($url, $method = null)
+    protected function request($url, array $postData = array(), $method = null)
     {
         if (null === $method) {
-            $method = Request::METHOD_GET;
+            $method = $postData ? Request::METHOD_POST : Request::METHOD_GET;
         }
 
         $request = new Request($method, $url);
+        if ($postData) {
+            $request->setContent(http_build_query($postData, null, '&'));
+        }
         $response = new Response();
         $this->client->send($request, $response);
 
