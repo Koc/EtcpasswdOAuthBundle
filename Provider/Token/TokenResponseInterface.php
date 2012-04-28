@@ -28,9 +28,9 @@ interface TokenResponseInterface
      * Returns the unix timestamp when this token will expire
      * and api calls are no longer be possible
      *
-     * @return int
+     * @return \DateTime
      */
-    function getExpires();
+    function getExpiresAt();
 
     /**
      * Returns wether or not this token is expiring at all

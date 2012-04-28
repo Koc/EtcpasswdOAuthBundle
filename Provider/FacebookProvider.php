@@ -31,13 +31,11 @@ class FacebookProvider extends Provider
 
         $accessToken = $result['access_token'];
 
-        $url = 'https://graph.facebook.com/me'
-            .'?access_token='.$accessToken;
+        $url = 'https://graph.facebook.com/me?access_token='.$accessToken;
 
         $json = json_decode($this->request($url));
-        $expiresAt = time() + $result['expires'];
 
-        return new FacebookToken($json, $accessToken, $expiresAt);
+        return new FacebookToken($json, $accessToken, new \DateTime('@'.(time() + $result['expires']), new \DateTimeZone('UTC')));
     }
 
     /**

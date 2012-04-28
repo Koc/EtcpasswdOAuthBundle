@@ -19,7 +19,7 @@ interface ProviderInterface
      *
      * @return TokenResponseInterface|null
      */
-    function createTokenResponse($clientId, $secret, $code, $redirectUrl = "");
+    function createTokenResponse($clientId, $secret, $code, $redirectUrl = '');
 
     /**
     * Returns the URL which is called to authorize a user

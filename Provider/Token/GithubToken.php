@@ -28,7 +28,7 @@ class GithubToken implements TokenResponseInterface
     /**
      * {@inheritDoc}
      */
-    public function getExpires()
+    public function getExpiresAt()
     {
         throw new \LogicException('Token does not expire');
     }

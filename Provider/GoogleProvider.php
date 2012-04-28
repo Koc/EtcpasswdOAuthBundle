@@ -37,14 +37,13 @@ class GoogleProvider extends Provider
         if (isset($data->error)) {
             return;
         }
-        $expiresAt = time() + $data->expires_in;
 
         $people = 'https://www.googleapis.com/plus/v1/people/me'
             .'?key='.$clientId
             .'&access_token='.$data->access_token;
         $me = json_decode($this->request($people));
 
-        return new GoogleToken($me, $data->access_token, $expiresAt);
+        return new GoogleToken($me, $data->access_token, new \DateTime('@'.(time() + $data->expires_in), new \DateTimeZone('UTC')));
     }
 
     /**

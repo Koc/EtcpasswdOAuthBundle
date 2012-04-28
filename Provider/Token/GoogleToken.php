@@ -21,7 +21,7 @@ class GoogleToken implements TokenResponseInterface
      *
      * @return void
      */
-    public function __construct($jsonObject, $accessToken, $expiresAt)
+    public function __construct($jsonObject, $accessToken, \DateTime $expiresAt)
     {
         $this->json = $jsonObject;
         $this->accessToken = $accessToken;
@@ -31,7 +31,7 @@ class GoogleToken implements TokenResponseInterface
     /**
      * {@inheritDoc}
      */
-    public function getExpires()
+    public function getExpiresAt()
     {
         return $this->expiresAt;
     }
