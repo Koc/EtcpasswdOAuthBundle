@@ -5,6 +5,7 @@ namespace Etcpasswd\OAuthBundle\Security\Core\Authentication\Token;
 use Symfony\Component\Security\Core\Authentication\Token\AbstractToken;
 
 use Etcpasswd\OAuthBundle\Provider\Token\TokenResponseInterface;
+
 /**
  *
  * @author   Marcel Beerta <marcel@etcpasswd.de>
@@ -21,6 +22,7 @@ class OAuthToken extends AbstractToken
         $this->providerKey = $providerKey;
         $this->response = $response;
         $this->setAttribute('access_token', $response->getAccessToken());
+        $this->setAttribute('access_token_expiries_at', $response->getExpiresAt());
         $this->setAttribute('via', $response->getProviderKey());
         $this->setAttribute('data', $response->getJson());
     }
@@ -44,5 +46,23 @@ class OAuthToken extends AbstractToken
     public function getProviderKey()
     {
         return $this->providerKey;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function serialize()
+    {
+        return serialize(array($this->providerKey, parent::serialize()));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function unserialize($str)
+    {
+        list($this->providerKey, $parentStr) = unserialize($str);
+
+        parent::unserialize($parentStr);
     }
 }

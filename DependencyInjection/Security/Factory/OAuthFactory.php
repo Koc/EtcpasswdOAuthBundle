@@ -2,11 +2,11 @@
 
 namespace Etcpasswd\OAuthBundle\DependencyInjection\Security\Factory;
 
-use Symfony\Component\DependencyInjection\ContainerBuilder,
-    Symfony\Component\DependencyInjection\Reference,
-    Symfony\Component\DependencyInjection\DefinitionDecorator,
-    Symfony\Component\Config\Definition\Builder\NodeDefinition,
-    Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AbstractFactory;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\DefinitionDecorator;
+use Symfony\Component\Config\Definition\Builder\NodeDefinition;
+use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AbstractFactory;
 
 /**
  * OAuth Factory for setting up oauth related services hooking into
@@ -16,37 +16,14 @@ use Symfony\Component\DependencyInjection\ContainerBuilder,
  */
 class OAuthFactory extends AbstractFactory
 {
-    /**
-     * The factory key. This is used by the security framework
-     * to check which factory to invoke.
-     *
-     * @var string
-     */
-    protected $key;
-
-    /**
-     * Client options
-     *
-     * @var array
-     */
-    protected $options = array(
-        'client_id'                      => null,
-        'client_secret'                  => null,
-        'provider'                       => null,
-        'auth_provider'                  => null,
-        'scope'                          => null,
-        'uid'                            => null,
-        'check_path'                     => '/login_check',
-        'login_path'                     => '/login',
-        'use_forward'                    => false,
-        'always_use_default_target_path' => false,
-        'default_target_path'            => '/',
-        'target_path_parameter'          => '_target_path',
-        'use_referer'                    => false,
-        'failure_path'                   => null,
-        'failure_forward'                => false,
-        'remember_me'                    => false,
-    );
+    public function __construct()
+    {
+        $this->addOption('auth_provider');
+        $this->addOption('client_id');
+        $this->addOption('client_secret');
+        $this->addOption('uid');
+        $this->addOption('scope', '');
+    }
 
     /**
      * {@inheritDoc}
@@ -107,14 +84,6 @@ class OAuthFactory extends AbstractFactory
     }
 
     /**
-     * {@inheritDoc}
-     */
-    protected function isRememberMeAware($config)
-    {
-        return $config['remember_me'];
-    }
-
-    /**
      * @{inheritDoc}
      */
     protected function getListenerId()
@@ -127,7 +96,7 @@ class OAuthFactory extends AbstractFactory
      */
     public function getKey()
     {
-        return ($this->key !== null) ? $this->key : 'oauth';
+        return null === $this->key ? 'oauth' : $this->key;
     }
 
     /**
