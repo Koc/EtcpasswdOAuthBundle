@@ -2,11 +2,7 @@
 
 namespace Etcpasswd\OAuthBundle\Provider\Token;
 
-/**
- *
- * @author Marcel Beerta <marcel@etcpasswd.de>
- */
-class GoogleToken implements TokenResponseInterface
+class VkToken implements TokenResponseInterface
 {
     private $json;
     private $accessToken;
@@ -15,11 +11,11 @@ class GoogleToken implements TokenResponseInterface
     /**
      * Constructs a new token
      *
-     * @param object $jsonObject Json object
+     * @param object $jsonObject  Json object
      * @param string $accessToken Api access token
-     * @param \DateTime $expiresAt Expires at date
+     * @param string $expiresAt   expires at date
      */
-    public function __construct($jsonObject, $accessToken, \DateTime $expiresAt)
+    public function __construct($jsonObject, $accessToken, $expiresAt)
     {
         $this->json = $jsonObject;
         $this->accessToken = $accessToken;
@@ -37,8 +33,12 @@ class GoogleToken implements TokenResponseInterface
     /**
      * {@inheritDoc}
      */
-    public function getUsername($field = 'id')
+    public function getUsername($field = 'uid')
     {
+        if ('uid' === $field) {
+            return (string)$this->json->$field;
+        }
+
         return $this->json->$field;
     }
 
@@ -57,7 +57,7 @@ class GoogleToken implements TokenResponseInterface
 
     public function getProviderKey()
     {
-        return 'google';
+        return 'vk';
     }
 
     public function getJson()

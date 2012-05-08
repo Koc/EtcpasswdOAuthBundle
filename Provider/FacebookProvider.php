@@ -33,7 +33,7 @@ class FacebookProvider extends Provider
 
         $json = json_decode($this->request(sprintf('https://graph.facebook.com/me?access_token=%s', $result['access_token'])));
 
-        return new FacebookToken($json, $result['access_token'], new \DateTime('@'.(time() + $result['expires']), new \DateTimeZone('UTC')));
+        return new FacebookToken($json, $result['access_token'], new \DateTime('@'.(time() + $result['expires'])));
     }
 
     /**

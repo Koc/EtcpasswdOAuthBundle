@@ -1,6 +1,6 @@
 <?php
 
-namespace Katushkin\Bundle\UsersBundle\Security\Http\Authentication\Oauth;
+namespace Etcpasswd\OAuthBundle\Security\Http\Firewall;
 
 use Symfony\Component\Security\Http\Firewall\AbstractAuthenticationListener;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Etcpasswd\OAuthBundle\Provider\ProviderInterface;
 use Etcpasswd\OAuthBundle\Security\Core\Authentication\Token\OAuthToken;
 
-class AuthenticationListener extends AbstractAuthenticationListener
+class OAuthListener extends AbstractAuthenticationListener
 {
     private $oauthProvider;
     protected $httpUtils;
@@ -48,7 +48,7 @@ class AuthenticationListener extends AbstractAuthenticationListener
         // redirect to auth provider
         if (!$code) {
             return $this->createProviderRedirectResponse($request);
-    }
+        }
 
         $token = $this->oauthProvider->createTokenResponse(
             $this->options['client_id'],

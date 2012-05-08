@@ -15,9 +15,9 @@ class FacebookToken implements TokenResponseInterface
     /**
      * Constructs a new token
      *
-     * @param object $jsonObject  Json object
+     * @param object $jsonObject Json object
      * @param string $accessToken Api access token
-     * @param string $expiresAt   expires at date
+     * @param \DateTime $expiresAt Expires at date
      *
      * @return void
      */

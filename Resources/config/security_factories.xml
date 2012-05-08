@@ -5,6 +5,7 @@
     <parameters>
         <parameter key="etcpasswd_oauth.security.factory.class">Etcpasswd\OAuthBundle\DependencyInjection\Security\Factory\OAuthFactory</parameter>
     </parameters>
+
     <services>
         <service id="etcpasswd_oauth.security.factory"
             class="%etcpasswd_oauth.security.factory.class%"
@@ -30,6 +31,27 @@
             class="%etcpasswd_oauth.security.factory.class%"
             public="false">
             <call method="setKey"><argument>oauth_google</argument></call>
+            <tag name="security.listener.factory" />
+        </service>
+
+        <service id="etcpasswd_oauth.security.factory.vk"
+            class="%etcpasswd_oauth.security.factory.class%"
+            public="false">
+            <call method="setKey"><argument>oauth_vk</argument></call>
+            <tag name="security.listener.factory" />
+        </service>
+
+        <service id="etcpasswd_oauth.security.factory.mrc"
+            class="%etcpasswd_oauth.security.factory.class%"
+            public="false">
+            <call method="setKey"><argument>oauth_mrc</argument></call>
+            <tag name="security.listener.factory" />
+        </service>
+
+        <service id="etcpasswd_oauth.security.factory.odnoklassniki"
+            class="%etcpasswd_oauth.security.factory.class%"
+            public="false">
+            <call method="setKey"><argument>oauth_odnoklassniki</argument></call>
             <tag name="security.listener.factory" />
         </service>
     </services>

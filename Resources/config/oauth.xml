@@ -3,7 +3,6 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-
     <parameters>
         <parameter key="etcpasswd_oauth.authentication.provider.oauth.class">Etcpasswd\OAuthBundle\Security\Core\Authentication\Provider\OAuthProvider</parameter>
         <parameter key="etcpasswd_oauth.authentication.listener.oauth.class">Etcpasswd\OAuthBundle\Security\Http\Firewall\OAuthListener</parameter>
@@ -12,6 +11,8 @@
         <parameter key="etcpasswd_oauth.user.model.class">Etcpasswd\OAuthBundle\Model\User</parameter>
 
         <parameter key="etcpasswd_oauth.http_client.class">Buzz\Client\Curl</parameter>
+
+        <parameter key="etcpasswd_oauth.provider.odnoklassniki.application_key"></parameter> <!-- You should override this parameter in your application config -->
     </parameters>
 
     <services>
@@ -33,39 +34,28 @@
         </service>
 
         <!-- http client -->
-        <service id="etcpasswd_oauth.http_client" class="%etcpasswd_oauth.http_client.class%" public="false"  />
+        <service id="etcpasswd_oauth.http_client" class="%etcpasswd_oauth.http_client.class%" public="false" />
 
         <!-- oauth providers -->
         <service id="etcpasswd_oauth.provider.abstract" class="Etcpasswd\OAuthBundle\Provider\Provider" public="false" abstract="true">
             <argument type="service" id="etcpasswd_oauth.http_client" />
         </service>
 
-        <service id="etcpasswd_oauth.provider.github"
-            class="Etcpasswd\OAuthBundle\Provider\GithubProvider"
-            parent="etcpasswd_oauth.provider.abstract"
-            public="false" />
+        <service id="etcpasswd_oauth.provider.github" class="Etcpasswd\OAuthBundle\Provider\GithubProvider" parent="etcpasswd_oauth.provider.abstract" public="false" />
 
-        <service id="etcpasswd_oauth.provider.facebook"
-            class="Etcpasswd\OAuthBundle\Provider\FacebookProvider"
-            parent="etcpasswd_oauth.provider.abstract"
-            public="false" />
-        <service id="etcpasswd_oauth.provider.google"
-            class="Etcpasswd\OAuthBundle\Provider\GoogleProvider"
-            parent="etcpasswd_oauth.provider.abstract"
-            public="false" />
-        <!--
-        <service id="etcpasswd_oauth.provider.twitter"
-            class="Etcpasswd\OAuthBundle\Provider\FacebookProvider"
-            parent="etcpasswd_oauth.provider.abstract"
-            public="false" />
+        <service id="etcpasswd_oauth.provider.facebook" class="Etcpasswd\OAuthBundle\Provider\FacebookProvider" parent="etcpasswd_oauth.provider.abstract" public="false" />
 
+        <service id="etcpasswd_oauth.provider.google" class="Etcpasswd\OAuthBundle\Provider\GoogleProvider" parent="etcpasswd_oauth.provider.abstract" public="false" />
 
+        <service id="etcpasswd_oauth.provider.vk" class="Etcpasswd\OAuthBundle\Provider\VkProvider" parent="etcpasswd_oauth.provider.abstract" public="false" />
 
-        <service id="etcpasswd_oauth.provider.yahoo"
-            class="Etcpasswd\OAuthBundle\Provider\FacebookProvider"
-            parent="etcpasswd_oauth.provider.abstract"
-            public="false" />
-        -->
+        <service id="etcpasswd_oauth.provider.mrc" class="Etcpasswd\OAuthBundle\Provider\MrcProvider" parent="etcpasswd_oauth.provider.abstract" public="false" />
+
+        <service id="etcpasswd_oauth.provider.odnoklassniki" class="Etcpasswd\OAuthBundle\Provider\OdnoklassnikiProvider" parent="etcpasswd_oauth.provider.abstract" public="false">
+            <call method="setApplicationKey">
+                <argument>%etcpasswd_oauth.provider.odnoklassniki.application_key%</argument>
+            </call>
+        </service>
     </services>
 
 </container>

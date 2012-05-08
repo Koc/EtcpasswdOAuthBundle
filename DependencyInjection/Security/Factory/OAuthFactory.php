@@ -16,6 +16,14 @@ use Symfony\Bundle\SecurityBundle\DependencyInjection\Security\Factory\AbstractF
  */
 class OAuthFactory extends AbstractFactory
 {
+    /**
+     * The factory key. This is used by the security framework
+     * to check which factory to invoke.
+     *
+     * @var string
+     */
+    protected $key;
+
     public function __construct()
     {
         $this->addOption('auth_provider');
@@ -40,7 +48,7 @@ class OAuthFactory extends AbstractFactory
             )
             ->replaceArgument(0, $providerKey);
 
-        if ($config['provider']) {
+        if (isset($config['provider'])) {
             $definition
                 ->addArgument(new Reference($userProviderId))
                 ->addArgument(new Reference('security.user_checker'))

@@ -2,9 +2,6 @@
 
 namespace Etcpasswd\OAuthBundle\Provider;
 
-use Buzz\Message\Request;
-use Buzz\Message\Response;
-
 use Etcpasswd\OAuthBundle\Provider\Token\GoogleToken;
 
 /**
@@ -20,7 +17,7 @@ class GoogleProvider extends Provider
      */
     public function createTokenResponse($clientId, $secret, $code, $redirectUrl = '')
     {
-        $response = $this->client->request('https://www.google.com/accounts/o8/oauth2/token', array(
+        $response = $this->request('https://www.google.com/accounts/o8/oauth2/token', array(
             'code'          => $code,
             'client_id'     => $clientId,
             'client_secret' => $secret,
@@ -28,14 +25,15 @@ class GoogleProvider extends Provider
             'redirect_uri'  => $redirectUrl
         ));
 
-        $data = json_decode($response->getContent());
+        $data = json_decode($response);
+
         if (isset($data->error)) {
             return;
         }
 
         $me = json_decode($this->request(sprintf('https://www.googleapis.com/plus/v1/people/me?key=%s&access_token=%s', $clientId, $data->access_token)));
 
-        return new GoogleToken($me, $data->access_token, new \DateTime('@'.(time() + $data->expires_in), new \DateTimeZone('UTC')));
+        return new GoogleToken($me, $data->access_token, new \DateTime('@'.(time() + $data->expires_in)));
     }
 
     /**

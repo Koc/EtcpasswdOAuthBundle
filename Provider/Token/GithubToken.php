@@ -14,10 +14,8 @@ class GithubToken implements TokenResponseInterface
     /**
      * Constructs a new token
      *
-     * @param object $jsonObject  Json object
+     * @param object $jsonObject Json object
      * @param string $accessToken Api access token
-     *
-     * @return void
      */
     public function __construct($jsonObject, $accessToken)
     {
